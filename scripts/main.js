@@ -12,8 +12,7 @@ var userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like
 console.log('Using user agent: ' + userAgent);
 console.log('Process arguments: ' + process.argv);
 
-app.commandLine.appendSwitch('enable-features', 'VaapiVideoDecoder,WaylandWindowDecorations,RawDraw');
-
+app.commandLine.appendSwitch('enable-features', 'AcceleratedVideoDecodeLinuxGL,VaapiVideoDecoder,VaapiIgnoreDriverChecks');
 app.commandLine.appendSwitch(
   'disable-features',
   'UseChromeOSDirectVideoDecoder'
@@ -25,6 +24,8 @@ app.commandLine.appendSwitch('enable-native-gpu-memory-buffers');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('enable-zero-copy');
 app.commandLine.appendSwitch('enable-gpu-memory-buffer-video-frames');
+app.commandLine.appendSwitch('enable-accelerated-video-decode');
+app.commandLine.appendSwitch('use-gl', 'angle');
 
 // To identify a possible stable 'use-gl' switch implementation for our application, we utilize a config file that stores the number of crashes.
 // On Linux, the crash count is likely stored here: /home/[username]/.config/GeForce NOW/config.json.
@@ -44,17 +45,6 @@ const configPath = path.join(app.getPath('userData'), 'config.json');
 const config = fs.existsSync(configPath) ?
   JSON.parse(fs.readFileSync(configPath, 'utf-8')) :
   { crashCount: 0 };
-
-switch(config.crashCount) {
-  case 0:
-    app.commandLine.appendSwitch('use-gl', 'angle');
-    break;
-  case 1:
-    app.commandLine.appendSwitch('use-gl', 'egl');
-    break;
-  default:
-    app.disableHardwareAcceleration();
-}
 
 async function createWindow() {
   const mainWindow = new BrowserWindow({
